@@ -13,7 +13,6 @@ cd myshell
 make
 ./myshell
 
-
 ls -la | grep .c          # piping
 echo $HOME                # env variable
 sleep 10 &                # background job

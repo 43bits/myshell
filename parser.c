@@ -1,27 +1,16 @@
-// ================================================
-// parser.c — Input Tokenizer & Parser
-// Handles: pipes, redirection, background, quotes
-// ================================================
-
 #include "shell.h"
-
-// ─── Helper: strip leading/trailing whitespace ───
 static char *trim(char *s) {
     while (*s == ' ' || *s == '\t') s++;
     char *end = s + strlen(s) - 1;
     while (end > s && (*end == ' ' || *end == '\t')) *end-- = '\0';
     return s;
 }
-
-// ─── Expand environment variables ($HOME, $PATH) ─
 static char *expand_env(char *token) {
     if (token[0] != '$') return strdup(token);
     char *val = getenv(token + 1);
     return val ? strdup(val) : strdup("");
 }
 
-// ─── Parse a single command segment ──────────────
-// e.g. "grep -n foo < input.txt > out.txt"
 static void parse_command(char *segment, Command *cmd) {
     cmd->argc         = 0;
     cmd->input_file   = NULL;
@@ -36,7 +25,6 @@ static void parse_command(char *segment, Command *cmd) {
     rest = buf;
 
     while ((token = strtok_r(rest, " \t", &rest))) {
-        // Handle >> (append) redirection
         if (strcmp(token, ">>") == 0) {
             char *file = strtok_r(rest, " \t", &rest);
             if (file) {
@@ -44,17 +32,14 @@ static void parse_command(char *segment, Command *cmd) {
                 cmd->append_output = 1;
             }
         }
-        // Handle > (output) redirection
         else if (strcmp(token, ">") == 0) {
             char *file = strtok_r(rest, " \t", &rest);
             if (file) cmd->output_file = strdup(file);
         }
-        // Handle < (input) redirection
         else if (strcmp(token, "<") == 0) {
             char *file = strtok_r(rest, " \t", &rest);
             if (file) cmd->input_file = strdup(file);
         }
-        // Handle inline >> within token e.g. "file>>"
         else if (strstr(token, ">>")) {
             char *pos = strstr(token, ">>");
             *pos = '\0';
@@ -63,7 +48,6 @@ static void parse_command(char *segment, Command *cmd) {
             cmd->output_file   = strdup(pos + 2);
             cmd->append_output = 1;
         }
-        // Handle inline > within token
         else if (strchr(token, '>')) {
             char *pos = strchr(token, '>');
             *pos = '\0';
@@ -71,7 +55,6 @@ static void parse_command(char *segment, Command *cmd) {
                 cmd->args[cmd->argc++] = expand_env(token);
             cmd->output_file = strdup(pos + 1);
         }
-        // Handle inline < within token
         else if (strchr(token, '<')) {
             char *pos = strchr(token, '<');
             *pos = '\0';
@@ -79,16 +62,14 @@ static void parse_command(char *segment, Command *cmd) {
                 cmd->args[cmd->argc++] = expand_env(token);
             cmd->input_file = strdup(pos + 1);
         }
-        // Normal argument
         else {
             if (cmd->argc < MAX_ARGS - 1)
                 cmd->args[cmd->argc++] = expand_env(token);
         }
     }
-    cmd->args[cmd->argc] = NULL;  // NULL-terminate for execvp
+    cmd->args[cmd->argc] = NULL;  /
 }
 
-// ─── Main Parser ─────────────────────────────────
 Pipeline *parse_input(char *raw_input) {
     if (!raw_input || strlen(raw_input) == 0) return NULL;
 
@@ -99,14 +80,12 @@ Pipeline *parse_input(char *raw_input) {
     strncpy(input, raw_input, MAX_INPUT - 1);
     input[MAX_INPUT - 1] = '\0';
 
-    // Check for background operator &
     char *amp = strrchr(input, '&');
     if (amp) {
         p->background = 1;
         *amp = '\0';
     }
 
-    // Split by pipe '|'
     char *segment;
     char *rest = input;
     p->num_cmds = 0;
@@ -128,7 +107,6 @@ Pipeline *parse_input(char *raw_input) {
     return p;
 }
 
-// ─── Free all allocated memory in pipeline ───────
 void free_pipeline(Pipeline *p) {
     if (!p) return;
     for (int i = 0; i < p->num_cmds; i++) {
@@ -141,7 +119,6 @@ void free_pipeline(Pipeline *p) {
     free(p);
 }
 
-// ─── Debug: print parsed pipeline ────────────────
 void debug_pipeline(Pipeline *p) {
     if (!p) return;
     printf(COLOR_YELLOW "[DEBUG] %d command(s), background=%d\n" COLOR_RESET,

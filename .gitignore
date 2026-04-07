@@ -1,4 +1,4 @@
 *.o
 myshell
 *.log
-.vscode
+/.vscode

@@ -1,15 +1,9 @@
-// ================================================
-// jobs.c — Background Job Table Management
-// ================================================
-
 #include "shell.h"
 
 Job job_table[MAX_JOBS];
 int job_count = 0;
 
-// ─── Add a new job ────────────────────────────────
 int add_job(pid_t pgid, const char *cmd, JobState state) {
-    // Find an empty slot
     for (int i = 0; i < MAX_JOBS; i++) {
         if (job_table[i].pgid == 0) {
             job_table[i].id    = i + 1;
@@ -24,7 +18,6 @@ int add_job(pid_t pgid, const char *cmd, JobState state) {
     return -1;
 }
 
-// ─── Remove a job by pgid ────────────────────────
 void remove_job(pid_t pgid) {
     for (int i = 0; i < MAX_JOBS; i++) {
         if (job_table[i].pgid == pgid) {
@@ -33,14 +26,12 @@ void remove_job(pid_t pgid) {
     }
 }
 
-// ─── Find job by pgid ─────────────────────────────
 Job *find_job_by_pgid(pid_t pgid) {
     for (int i = 0; i < MAX_JOBS; i++)
         if (job_table[i].pgid == pgid) return &job_table[i];
     return NULL;
 }
 
-// ─── Poll all jobs for state changes ─────────────
 void update_jobs(void) {
     for (int i = 0; i < MAX_JOBS; i++) {
         if (job_table[i].pgid == 0) continue;
@@ -61,7 +52,6 @@ void update_jobs(void) {
     }
 }
 
-// ─── Print all active jobs ────────────────────────
 void print_jobs(void) {
     int any = 0;
     for (int i = 0; i < MAX_JOBS; i++) {
@@ -82,7 +72,6 @@ void print_jobs(void) {
                job_table[i].id, color, state_str,
                COLOR_RESET, job_table[i].pgid, job_table[i].cmd);
 
-        // Clean up done jobs after displaying
         if (job_table[i].state == JOB_DONE)
             memset(&job_table[i], 0, sizeof(Job));
     }

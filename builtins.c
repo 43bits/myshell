@@ -1,24 +1,14 @@
-// ================================================
-// builtins.c — Built-in Shell Commands
-// cd, exit, help, history, jobs, export, pwd, clear
-// ================================================
-
 #include "shell.h"
-
-// ─── List of all builtin command names ───────────
 static const char *builtin_names[] = {
     "cd", "exit", "help", "history",
     "jobs", "export", "pwd", "clear", NULL
 };
-
 int is_builtin(const char *cmd) {
     if (!cmd) return 0;
     for (int i = 0; builtin_names[i]; i++)
         if (strcmp(cmd, builtin_names[i]) == 0) return 1;
     return 0;
 }
-
-// ─── Dispatcher ───────────────────────────────────
 int run_builtin(Command *cmd) {
     if (!cmd || !cmd->args[0]) return 1;
 
@@ -55,7 +45,6 @@ int run_builtin(Command *cmd) {
     return 1;
 }
 
-// ─── cd ───────────────────────────────────────────
 void builtin_cd(Command *cmd) {
     const char *dir;
 
@@ -82,7 +71,6 @@ void builtin_cd(Command *cmd) {
     }
 }
 
-// ─── help ─────────────────────────────────────────
 void builtin_help(void) {
     printf(COLOR_CYAN
     "╔══════════════════════════════════════════════╗\n"
@@ -105,22 +93,16 @@ void builtin_help(void) {
     printf("  Background:   cmd &\n");
     printf("  Env vars:     echo $HOME\n");
 }
-
-// ─── history ─────────────────────────────────────
 void builtin_history(void) {
     for (int i = 0; i < history_count; i++)
         printf(COLOR_YELLOW "  %3d  " COLOR_RESET "%s\n", i + 1, history[i]);
     if (history_count == 0)
         printf("  (no history)\n");
 }
-
-// ─── jobs ─────────────────────────────────────────
 void builtin_jobs(void) {
     update_jobs();
     print_jobs();
 }
-
-// ─── exit ─────────────────────────────────────────
 void builtin_exit_shell(Command *cmd) {
     int code = 0;
     if (cmd->argc >= 2) code = atoi(cmd->args[1]);
