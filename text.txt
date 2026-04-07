@@ -1,0 +1,27 @@
+myshell/
+├── Makefile          ← build system like real projects
+├── shell.h           ← all structs & function declarations
+├── shell.c           ← main loop
+├── parser.c          ← input tokenizer & parser
+├── executor.c        ← fork/exec/pipe logic
+├── builtins.c        ← cd, exit, help, history
+├── jobs.c            ← background job tracking
+└── signals.c         ← signal handlers
+
+# Copy files into WSL, then:
+cd myshell
+make
+./myshell
+
+
+ls -la | grep .c          # piping
+echo $HOME                # env variable
+sleep 10 &                # background job
+jobs                      # see background jobs
+cat < shell.c > copy.c   # full redirection
+history                   # command history
+
+
+PS E:\work\Os\myshell> wsl.exe -d Ubuntu 
+To run a command as administrator (user "root"), use "sudo <command>".
+See "man sudo_root" for details.

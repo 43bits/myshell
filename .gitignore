@@ -1,0 +1,6 @@
+# Compiled files
+*.o
+myshell
+
+# Temporary
+*.log
